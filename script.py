@@ -9,8 +9,7 @@ def train_func():
     print(output)
     trainer = TorchTrainer(train_func, scaling_config=ScalingConfig(num_workers=2, use_gpu=True, resources_per_worker={'GPU': 1}))
     trainer.fit()
-
-# # train_func()
+train_func()
 # import ray
 
 # ray.init()
