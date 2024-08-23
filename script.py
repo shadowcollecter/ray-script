@@ -53,3 +53,4 @@ class LLMActor:
 # run an actor
 llm_actor = LLMActor.remote()
 output = ray.get(llm_actor.generate.remote('San Francisco is a'))
+print(output)
