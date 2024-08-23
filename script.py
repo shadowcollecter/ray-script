@@ -59,6 +59,7 @@
 import torch
 from ray.train import ScalingConfig
 from ray.train.torch import TorchTrainer, get_device
+from vllm import LLM
 
 
 def train_func():
@@ -67,6 +68,13 @@ def train_func():
     device = get_device()
     assert device == torch.device("cuda:0")
     # assert devices == [torch.device("cuda:0"), torch.device("cuda:1")]
+    
+def inference_func():
+    llm = LLM('facebook/opt-6.7b', tensor_parallel_size=2, gpu_memory_utilization=0.8)
+    output = llm.generate('San Francisco is a')
+    print(output)
+    
+    # assert devices == [torch.device("cuda:0"), torch.device("cuda:1")] 
 
 trainer = TorchTrainer(
     train_func,
@@ -76,4 +84,15 @@ trainer = TorchTrainer(
         resources_per_worker={"GPU": 1}
     )
 )
+
+iferencer = TorchTrainer(
+    inference_func,
+    scaling_config=ScalingConfig(
+        num_workers=2,
+        use_gpu=True,
+        resources_per_worker={"GPU": 1}
+    )
+)
+
 trainer.fit()
+iferencer.fit()
