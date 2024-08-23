@@ -58,14 +58,13 @@
 
 import torch
 from ray.train import ScalingConfig
-from ray.train.torch import TorchTrainer, get_device, get_devices
+from ray.train.torch import TorchTrainer, get_device
 
 
 def train_func():
     assert torch.cuda.is_available()
 
     device = get_device()
-    devices = get_devices()
     assert device == torch.device("cuda:0")
     # assert devices == [torch.device("cuda:0"), torch.device("cuda:1")]
 
