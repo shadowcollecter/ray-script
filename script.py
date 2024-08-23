@@ -36,21 +36,45 @@
 # # up and the actors are placed.
 # ray.get([actor.say_hello.remote() for actor in gpu_actors])
 
-import ray
-from vllm import LLM
+# import ray
+# from vllm import LLM
 
-ray.init()
+# ray.init()
 
-@ray.remote(num_gpus=2)
-class LLMActor:
-    def __init__(self):
-        self.llm = LLM('facebook/opt-6.7b', tensor_parallel_size=2, gpu_memory_utilization=0.8)
+# @ray.remote(num_gpus=2)
+# class LLMActor:
+#     def __init__(self):
+#         self.llm = LLM('facebook/opt-6.7b', tensor_parallel_size=2, gpu_memory_utilization=0.8)
     
-    def generate(self, text):
-        return self.llm.generate(text)
+#     def generate(self, text):
+#         return self.llm.generate(text)
     
 
-# run an actor
-llm_actor = LLMActor.remote()
-output = ray.get(llm_actor.generate.remote('San Francisco is a'))
-print(output)
+# # run an actor
+# llm_actor = LLMActor.remote()
+# output = ray.get(llm_actor.generate.remote('San Francisco is a'))
+# print(output)
+
+
+import torch
+from ray.train import ScalingConfig
+from ray.train.torch import TorchTrainer, get_device, get_devices
+
+
+def train_func():
+    assert torch.cuda.is_available()
+
+    device = get_device()
+    devices = get_devices()
+    assert device == torch.device("cuda:0")
+    # assert devices == [torch.device("cuda:0"), torch.device("cuda:1")]
+
+trainer = TorchTrainer(
+    train_func,
+    scaling_config=ScalingConfig(
+        num_workers=1,
+        use_gpu=True,
+        resources_per_worker={"GPU": 1}
+    )
+)
+trainer.fit()
